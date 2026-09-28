@@ -22,7 +22,7 @@ See `RUNBOOK.md`. Live output and resource identifiers are recorded under `evide
 
 ## Presentation
 
-Open [`index.html`](index.html) in a browser for the seven-slide, self-contained presentation. Use the arrow keys or the on-screen controls; choose **PDF** (or press **P**) to print every slide to a PDF for the FE Bar deck attachment. `deck.md` is the text-readable source and fallback attachment. All figures are synthetic or explicitly modeled.
+Open the [HTML presentation](https://sifinell.github.io/fe-bar-pharmacy-pickup/) or [`index.html`](index.html) locally for the seven-slide, self-contained deck. Use the arrow keys or the on-screen controls; choose **PDF** (or press **P**) to print every slide to a PDF for the FE Bar deck attachment. `deck.md` is the text-readable source and fallback attachment. All figures are synthetic or explicitly modeled.
 
 ## Integrity and limitations
 
