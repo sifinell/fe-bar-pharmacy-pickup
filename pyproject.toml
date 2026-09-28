@@ -1,0 +1,8 @@
+[project]
+name = "fe-bar-pharmacy-pickup-data"
+version = "0.1.0"
+description = "Synthetic raw-data generator for the pharmacy pickup FE Bar prototype"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "databricks-connect>=17.3,<17.4",
+]

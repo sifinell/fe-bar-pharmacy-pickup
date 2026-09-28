@@ -1,0 +1,18 @@
+bundle:
+  name: fe_bar_pharmacy_pickup
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    default: fe_bar_pharmacy_demo
+  schema:
+    default: pickup_operations
+
+targets:
+  neutral:
+    default: true
+    mode: development
+    workspace:
+      profile: DEFAULT

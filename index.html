@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1725">
+  <title>Pickup availability | Synthetic pharmacy operations demo</title>
+  <style>
+    :root { color-scheme: dark; --ink: #ecf4f5; --muted: #a9bdc5; --navy: #0a1725; --panel: #12283a; --line: #315066; --mint: #62e0c3; --gold: #ffcf75; --coral: #ff8f7e; --blue: #90baff; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; background: var(--navy); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button { font: inherit; }
+    a { color: var(--mint); }
+    .deck { min-height: 100svh; }
+    .slide { min-height: 100svh; padding: clamp(2.5rem, 6vw, 6rem) clamp(1.25rem, 7vw, 8rem) 6.5rem; position: relative; overflow: hidden; display: grid; align-content: center; gap: clamp(1.4rem, 3vw, 2.5rem); background: radial-gradient(circle at 90% 8%, #173b4f 0, transparent 35%), var(--navy); }
+    .slide:nth-child(even) { background: radial-gradient(circle at 3% 90%, #163d4a 0, transparent 38%), var(--navy); }
+    .slide[hidden] { display: none; }
+    .slide::before { content: ""; position: absolute; width: 23rem; height: 23rem; right: -12rem; bottom: -16rem; border: 1px solid #31556a; border-radius: 50%; pointer-events: none; }
+    .eyebrow { margin: 0; color: var(--mint); font-size: .82rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(3.1rem, 7vw, 6.9rem); line-height: .98; letter-spacing: -.065em; max-width: 15ch; margin-bottom: .2rem; }
+    h2 { font-size: clamp(2.3rem, 5vw, 4.7rem); line-height: 1.04; letter-spacing: -.05em; max-width: 22ch; margin-bottom: 0; }
+    h3 { font-size: clamp(1.1rem, 1.6vw, 1.45rem); line-height: 1.2; margin-bottom: .7rem; }
+    p, li { font-size: clamp(1rem, 1.4vw, 1.25rem); line-height: 1.5; }
+    .lede { color: var(--muted); max-width: 68ch; }
+    .accent { color: var(--mint); }
+    .warning { color: var(--coral); }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--line); border-radius: 1.2rem; padding: clamp(1.1rem, 2.3vw, 2rem); box-shadow: 0 18px 40px #0002; }
+    .card p:last-child { margin-bottom: 0; }
+    .metric { font-size: clamp(2.1rem, 4.5vw, 4.7rem); letter-spacing: -.06em; line-height: 1; font-weight: 780; margin: .2rem 0 .7rem; font-variant-numeric: tabular-nums; }
+    .metric.small { font-size: clamp(1.8rem, 3vw, 3rem); }
+    .label { font-size: .88rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 720; }
+    .meta { font-size: .88rem; color: var(--muted); }
+    .pill { display: inline-block; border: 1px solid #6dbda9; color: var(--mint); border-radius: 100px; padding: .35rem .7rem; font-size: .78rem; font-weight: 760; letter-spacing: .055em; text-transform: uppercase; }
+    .pill.gold { border-color: #bd9559; color: var(--gold); }
+    .pill.coral { border-color: #b86c66; color: var(--coral); }
+    .bar-row { display: grid; grid-template-columns: minmax(8.5rem, 12rem) 1fr 5.5rem; gap: 1rem; align-items: center; margin: 1rem 0; font-size: 1.05rem; }
+    .bar-track { height: 1.25rem; background: #213b4e; border-radius: .65rem; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--blue); border-radius: inherit; min-width: .35rem; }
+    .bar-fill.hot { background: var(--coral); }
+    .bar-value { font-variant-numeric: tabular-nums; text-align: right; font-weight: 750; }
+    .flow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .55rem; align-items: stretch; }
+    .flow-step { background: var(--panel); border: 1px solid var(--line); border-radius: 1rem; padding: 1rem; min-height: 9rem; }
+    .flow-step strong { display: block; font-size: 1.05rem; line-height: 1.2; margin: .65rem 0 .45rem; }
+    .flow-step span { color: var(--muted); font-size: .86rem; line-height: 1.4; }
+    .flow-step b { color: var(--mint); font-size: .78rem; }
+    .code { background: #07111c; border: 1px solid var(--line); border-radius: 1rem; color: #c7e6e5; padding: 1.2rem; font-size: clamp(.8rem, 1.1vw, 1rem); overflow-wrap: anywhere; white-space: pre-wrap; line-height: 1.55; }
+    .callout { border-left: .3rem solid var(--mint); padding: .35rem 0 .35rem 1.1rem; color: var(--ink); max-width: 75ch; }
+    .callout.coral { border-color: var(--coral); }
+    .list { padding-left: 1.3rem; margin: 0; }
+    .list li { margin: .6rem 0; }
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(1rem, 3vw, 3rem); align-items: start; }
+    .subtle { color: var(--muted); }
+    .controls { position: fixed; z-index: 5; left: 0; right: 0; bottom: 0; min-height: 4.3rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .55rem clamp(1.25rem, 7vw, 8rem); background: #07121eea; border-top: 1px solid var(--line); backdrop-filter: blur(10px); }
+    .controls button { color: var(--ink); border: 1px solid var(--line); background: #173248; border-radius: .65rem; min-width: 2.7rem; min-height: 2.7rem; cursor: pointer; padding: .35rem .75rem; }
+    .controls button:hover:not(:disabled), .controls button:focus-visible { border-color: var(--mint); outline: 2px solid var(--mint); outline-offset: 2px; }
+    .controls button:disabled { opacity: .38; cursor: not-allowed; }
+    .control-group { display: flex; align-items: center; gap: .6rem; }
+    .counter { color: var(--muted); min-width: 4rem; text-align: center; font-variant-numeric: tabular-nums; }
+    .progress { position: fixed; z-index: 6; left: 0; right: 0; bottom: 4.3rem; height: 3px; background: #173248; }
+    .progress span { display: block; height: 100%; width: 14.285%; background: var(--mint); transition: width .2s ease; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 950px) { .grid, .grid.two, .split { grid-template-columns: 1fr; } .flow { grid-template-columns: repeat(3, 1fr); } .slide { align-content: start; padding-top: 4rem; } }
+    @media (max-width: 620px) { .flow { grid-template-columns: repeat(2, 1fr); } .bar-row { grid-template-columns: 7rem 1fr 3.8rem; gap: .55rem; font-size: .83rem; } .controls .hint { display: none; } .slide { padding-bottom: 7rem; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .progress span { transition: none; } }
+    @media print { @page { size: 16in 9in; margin: 0; } html, body { background: var(--navy) !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; } .slide, .slide[hidden] { display: grid !important; width: 16in; height: 9in; min-height: 9in; break-after: page; page-break-after: always; padding: .8in 1in .55in; } .controls, .progress { display: none !important; } .slide::after { content: "Synthetic FE Bar prototype · 2026"; position: absolute; bottom: .25in; left: 1in; color: var(--muted); font-size: 10pt; } }
+  </style>
+</head>
+<body>
+  <main class="deck" id="deck" aria-label="Pharmacy pickup availability presentation">
+    <section class="slide" id="slide-1" aria-labelledby="title-1">
+      <p class="eyebrow">Fictional regional pharmacy · synthetic FE Bar prototype</p>
+      <h1 id="title-1">Recover pickup availability <span class="accent">where it matters.</span></h1>
+      <p class="lede">A supplier disruption creates missed pickups, lost margin, and eroding trust. One governed data journey turns raw events into a manager's next decision.</p>
+      <div class="grid">
+        <div class="card"><div class="label">North / Cold &amp; flu · 5 days</div><div class="metric warning">50.82%</div><p>Missed-pickup rate in the simulated hotspot.</p></div>
+        <div class="card"><div class="label">Modeled exposure</div><div class="metric">€93.6k</div><p>Synthetic lost-margin exposure—not actual customer loss.</p></div>
+        <div class="card"><div class="label">Scenario: 30% prevented</div><div class="metric accent">~€28.1k</div><p>Potential protection per comparable incident; not realized savings.</p></div>
+      </div>
+      <p class="meta">Decision for executives: protect pickup trust and margin. Decision for operations: act on the right store/category today.</p>
+    </section>
+
+    <section class="slide" id="slide-2" aria-labelledby="title-2" hidden>
+      <p class="eyebrow">01 / The customer problem</p>
+      <h2 id="title-2">The signal arrives <span class="warning">too late.</span></h2>
+      <p class="lede">Inventory, orders, and supplier delays live in separate workflows. Teams often learn a pickup has failed only after the promise has been broken.</p>
+      <div class="split">
+        <div class="card">
+          <h3>Missed-pickup rate by region · Cold &amp; flu</h3>
+          <p class="meta">21–25 September 2026 · synthetic scenario</p>
+          <div class="bar-row"><span>North</span><div class="bar-track"><div class="bar-fill hot" style="width:100%"></div></div><span class="bar-value warning">50.82%</span></div>
+          <div class="bar-row"><span>Central</span><div class="bar-track"><div class="bar-fill" style="width:4.19%"></div></div><span class="bar-value">2.13%</span></div>
+          <div class="bar-row"><span>South</span><div class="bar-track"><div class="bar-fill" style="width:3.82%"></div></div><span class="bar-value">1.94%</span></div>
+          <p class="meta">Bars share a zero baseline; North sets the 50.82% display maximum.</p>
+        </div>
+        <div class="card">
+          <h3>The decision we enable</h3>
+          <p>Which store and category should a regional manager investigate first—before more pickup promises fail?</p>
+          <div class="callout">Measure missed orders, at-risk margin, low-stock SKUs, supplier delay, and time to intervention.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="slide-3" aria-labelledby="title-3" hidden>
+      <p class="eyebrow">02 / Show the operational action</p>
+      <h2 id="title-3">A morning queue that explains <span class="accent">why this store.</span></h2>
+      <p class="lede">The app ranks latest-day store/category combinations using a transparent triage heuristic—not a prediction probability.</p>
+      <div class="grid">
+        <div class="card"><div class="label">Top row</div><div class="metric small">Pharmacy 03</div><p>North · Cold &amp; flu<br><span class="pill coral">Priority 240.0</span></p></div>
+        <div class="card"><div class="label">Evidence</div><div class="metric small warning">375</div><p>Missed pickups · 80 low-stock SKUs · 47.5-hour mean supplier delay.</p></div>
+        <div class="card"><div class="label">Human-reviewed action</div><h3>Transfer or escalate</h3><p>AI proposes checking stock transfers or supplier escalation. A manager validates feasibility and store policy.</p></div>
+      </div>
+      <p class="callout">The queue makes the next investigation obvious. It never changes replenishment automatically or offers clinical advice.</p>
+    </section>
+
+    <section class="slide" id="slide-4" aria-labelledby="title-4" hidden>
+      <p class="eyebrow">03 / Ask the governed data</p>
+      <h2 id="title-4">Natural language, <span class="accent">inspectable answer.</span></h2>
+      <div class="split">
+        <div class="card">
+          <p class="pill">Question to Genie</p>
+          <h3>Which region and category had the highest missed-pickup rate during 21–25 September, and how much margin was lost?</h3>
+          <div class="metric small">North / Cold &amp; flu</div>
+          <p><strong>50.82%</strong> missed · <strong>€93,587.68</strong> modeled lost margin.</p>
+        </div>
+        <div>
+          <p class="label">Inspectable generated SQL · neutral catalog</p>
+          <pre class="code">SELECT region, category,
+       100 * SUM(missed_orders)
+           / SUM(order_count) AS miss_pct,
+       SUM(lost_margin_eur) AS lost_margin_eur
+FROM fe_bar_pharmacy_demo.pickup_operations.gold_pickup_daily
+WHERE order_date BETWEEN DATE '2026-09-21'
+                     AND DATE '2026-09-25'
+GROUP BY region, category
+ORDER BY miss_pct DESC;</pre>
+          <p class="meta">Illustrative readable SQL for this question; inspect the actual generated SQL in the app.</p>
+        </div>
+      </div>
+      <p class="callout coral">Trust lesson from the live run: Genie returned the correct numbers but called the highest failure rate “top-performing.” A human must verify meaning, not only arithmetic.</p>
+    </section>
+
+    <section class="slide" id="slide-5" aria-labelledby="title-5" hidden>
+      <p class="eyebrow">04 / One integrated data journey</p>
+      <h2 id="title-5">From raw event to <span class="accent">operational decision.</span></h2>
+      <div class="flow" aria-label="Data architecture flow">
+        <div class="flow-step"><b>01 · SOURCE</b><strong>Synthetic Parquet</strong><span>Linked stores, products, inventory, orders, deliveries.</span></div>
+        <div class="flow-step"><b>02 · INGEST</b><strong>Lakeflow</strong><span>Serverless bronze, validated silver, decision-grain gold.</span></div>
+        <div class="flow-step"><b>03 · GOVERN</b><strong>Unity Catalog</strong><span>Volume, tables, ownership, quality, lineage.</span></div>
+        <div class="flow-step"><b>04 · ENRICH</b><strong>AI Function</strong><span>Five urgent human-reviewable action notes.</span></div>
+        <div class="flow-step"><b>05 · SERVE</b><strong>Lakebase</strong><span>Triggered Delta-to-Postgres action queue sync.</span></div>
+        <div class="flow-step"><b>06 · USE</b><strong>App + Genie</strong><span>Fast queue and governed natural-language investigation.</span></div>
+      </div>
+      <p class="callout">Unity Catalog remains the source of truth. The app serves the queue from Lakebase; Genie queries the governed analytical tables.</p>
+    </section>
+
+    <section class="slide" id="slide-6" aria-labelledby="title-6" hidden>
+      <p class="eyebrow">05 / Architect's view</p>
+      <h2 id="title-6">Designed for trust, with <span class="warning">visible trade-offs.</span></h2>
+      <div class="grid two">
+        <div class="card"><h3>What is governed</h3><ul class="list"><li>Lakeflow quality expectations passed 120,000 orders with zero rejected rows.</li><li>Genie queries Unity Catalog on behalf of the signed-in user; generated SQL stays visible.</li><li>The app identity can read the synced Postgres table, but cannot insert into it.</li></ul></div>
+        <div class="card"><h3>What a production pilot must address</h3><ul class="list"><li>Triggered Lakebase sync is not real time; monitor freshness against the operating SLA.</li><li>Unity Catalog row/column policies do not automatically become Postgres policies.</li><li>AI notes are advisory, and supply constraints require human approval.</li></ul></div>
+      </div>
+      <p class="meta">No patient data, real customer records, or automated clinical decisions are part of this prototype.</p>
+    </section>
+
+    <section class="slide" id="slide-7" aria-labelledby="title-7" hidden>
+      <p class="eyebrow">06 / Decision and pilot</p>
+      <h2 id="title-7">Prove the intervention, <span class="accent">not just the model.</span></h2>
+      <div class="grid two">
+        <div class="card"><div class="label">Business hypothesis</div><div class="metric accent">30%</div><p>Prevented modeled exposure in a comparable five-day event ≈ <strong>€28.1k</strong>. Validate actual margins and intervention costs before claiming ROI.</p></div>
+        <div class="card"><div class="label">Pilot success criteria</div><ul class="list"><li>Run one region and pickup-critical categories with a baseline or holdout.</li><li>Track missed-pickup rate, recovered margin, action lead time, and false alarms.</li><li>Reconcile Genie answers to SQL; review access and sync freshness.</li></ul></div>
+      </div>
+      <p class="callout">Executive ask: sponsor a bounded pilot. Operations ask: define feasible interventions. Technical ask: agree data contracts, identity, and freshness targets.</p>
+      <p class="meta">All figures in this presentation are synthetic or explicitly modeled. They are not observed customer impact.</p>
+    </section>
+  </main>
+
+  <div class="progress" aria-hidden="true"><span id="progress"></span></div>
+  <nav class="controls" aria-label="Presentation controls">
+    <div class="control-group"><span class="pill">Synthetic demo</span><span class="hint meta">← → to navigate · P to print/PDF</span></div>
+    <div class="control-group"><button id="prev" type="button" aria-label="Previous slide">←</button><span id="counter" class="counter" aria-live="polite">1 / 7</span><button id="next" type="button" aria-label="Next slide">→</button><button id="print" type="button" aria-label="Print or save as PDF">PDF</button></div>
+  </nav>
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const previous = document.getElementById('prev');
+      const next = document.getElementById('next');
+      const counter = document.getElementById('counter');
+      const progress = document.getElementById('progress');
+      const readHash = () => Math.min(slides.length - 1, Math.max(0, (Number(location.hash.replace('#slide-', '')) || 1) - 1));
+      let current = readHash();
+      function show(index, updateHash = true) {
+        current = Math.min(slides.length - 1, Math.max(0, index));
+        slides.forEach((slide, i) => { slide.hidden = i !== current; });
+        counter.textContent = `${current + 1} / ${slides.length}`;
+        progress.style.width = `${100 * (current + 1) / slides.length}%`;
+        previous.disabled = current === 0;
+        next.disabled = current === slides.length - 1;
+        document.title = `${current + 1}/${slides.length} · Pickup availability`;
+        if (updateHash) history.replaceState(null, '', `#slide-${current + 1}`);
+      }
+      previous.addEventListener('click', () => show(current - 1));
+      next.addEventListener('click', () => show(current + 1));
+      document.getElementById('print').addEventListener('click', () => window.print());
+      addEventListener('hashchange', () => show(readHash(), false));
+      addEventListener('keydown', event => {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+        if (['ArrowRight', 'PageDown', ' '].includes(event.key)) { event.preventDefault(); show(current + 1); }
+        else if (['ArrowLeft', 'PageUp'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+        else if (event.key === 'Home') { event.preventDefault(); show(0); }
+        else if (event.key === 'End') { event.preventDefault(); show(slides.length - 1); }
+        else if (event.key.toLowerCase() === 'p' && !event.metaKey && !event.ctrlKey) { event.preventDefault(); window.print(); }
+      });
+      show(current, false);
+    })();
+  </script>
+</body>
+</html>

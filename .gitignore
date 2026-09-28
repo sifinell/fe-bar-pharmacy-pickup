@@ -1,0 +1,12 @@
+.venv/
+node_modules/
+dist/
+client/dist/
+*.tsbuildinfo
+.databricks/
+.env
+server/.env
+*.pyc
+__pycache__/
+uv.lock
+*.log

@@ -1,0 +1,43 @@
+bundle:
+  name: fe-bar-pharmacy-pickup
+
+variables:
+  genie_space_id:
+    description: Genie Space ID supplied for this workspace at deployment time
+  genie_space_name:
+    description: Genie Space display name
+    default: Fictional Pharmacy Pickup Operations
+  postgres_branch:
+    description: Full Lakebase Postgres branch resource name. Obtain by running `databricks postgres list-branches {project-name}`, select the desired item from the output array and use its .name value. Requires the project resource name.
+  postgres_database:
+    description: Full Lakebase Postgres database resource name. Obtain by running `databricks postgres list-databases {branch-name}`, select the desired item from the output array and use its .name value. Requires the branch resource name.
+
+resources:
+  apps:
+    app:
+      name: "fe-bar-pharmacy-pickup"
+      description: "Synthetic pharmacy pickup stockout intervention console"
+      source_code_path: ./
+
+      # Start the app automatically on deploy.
+      lifecycle:
+        started: true
+      user_api_scopes:
+        - dashboards.genie
+
+      # The resources which this app has access to.
+      resources:
+        - name: genie-space
+          genie_space:
+            name: ${var.genie_space_name}
+            space_id: ${var.genie_space_id}
+            permission: CAN_RUN
+        - name: postgres
+          postgres:
+            branch: ${var.postgres_branch}
+            database: ${var.postgres_database}
+            permission: CAN_CONNECT_AND_CREATE
+
+targets:
+  default:
+    default: true
